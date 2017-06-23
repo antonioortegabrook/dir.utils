@@ -1,0 +1,134 @@
+/**
+	Lists the content of a directory
+*/
+
+#include "ext.h"
+#include "ext_obex.h"
+
+
+/** Object struct
+ */
+typedef struct _dir_ls
+{
+	t_object        x_obj;
+
+	void		*ls_out;
+        
+} t_dir_ls;
+
+/** Function prototypes
+ */
+void *dir_ls_new(t_symbol *s, long argc, t_atom *argv);
+void dir_ls_free(t_dir_ls *x);
+void dir_ls_assist(t_dir_ls *x, void *b, long m, long a, char *s);
+
+void dir_ls_anything(t_dir_ls *x, t_symbol *s, long argc, t_atom *argv);
+
+
+/** Global class pointer variable
+ */
+void *dir_ls_class;
+
+
+void ext_main(void *r)
+{
+	t_class *c;
+
+	c = class_new("dir.ls", (method)dir_ls_new, (method)dir_ls_free, (long)sizeof(t_dir_ls),
+                      0L /* leave NULL!! */, A_GIMME, 0);
+
+        class_addmethod(c, (method)dir_ls_anything,             "anything",   A_GIMME,  0);
+        
+	class_addmethod(c, (method)dir_ls_assist,               "assist",     A_CANT, 0);
+
+	class_register(CLASS_BOX, c); /* CLASS_NOBOX */
+	dir_ls_class = c;
+}
+
+
+void dir_ls_assist(t_dir_ls *x, void *b, long m, long a, char *s)
+{
+	if (m == ASSIST_INLET) { // inlet
+		sprintf(s, "Path");
+	}
+	else {	// outlet
+		sprintf(s, "I am outlet %ld", a);
+	}
+}
+
+void dir_ls_free(t_dir_ls *x)
+{
+	;
+}
+
+
+void *dir_ls_new()
+{
+        t_dir_ls *x;
+        x = (t_dir_ls *)object_alloc(dir_ls_class);
+	
+	x->ls_out = listout(x);
+        
+	return (x);
+}
+
+
+void dir_ls_anything(t_dir_ls *x, t_symbol *s, long argc, t_atom *argv)
+{
+	char *path_name;
+	short path;
+	char filename[MAX_FILENAME_CHARS];
+
+	void *folder_state;
+
+	t_fourcc *file_type = NULL;
+	char next_filename[MAX_FILENAME_CHARS];
+	short descend = 0;
+	
+	char posix_filepath[MAX_PATH_CHARS];
+	char native_filepath[MAX_PATH_CHARS];
+	
+	t_atom output_filepath;
+	
+	if (!s) {
+		object_post((t_object *)x, "Not a symbol - return");
+		return;
+	}
+	
+	
+	path_name = s->s_name;
+	
+	if (!path_frompathname(path_name, &path, filename)) {
+		
+		folder_state = path_openfolder(path);
+		
+		if ((int *)folder_state == 0) {
+			
+			object_post((t_object *)x, "Directory cannot be accessed - return");
+			return;
+		}
+	} else {
+		// error code
+		return;
+	}
+
+	// iterate through directory
+	while (path_foldernextfile(folder_state, file_type, next_filename, descend)) {
+		
+		path_toabsolutesystempath(path, next_filename, posix_filepath);
+		
+		// probar diferentes PATH_TYPE. Agregarlo como parámetro
+		path_nameconform(posix_filepath, native_filepath, PATH_STYLE_NATIVE, PATH_TYPE_ABSOLUTE);
+		
+		// put into atom
+		atom_setsym(&output_filepath, gensym(native_filepath));
+
+		// send data out
+		outlet_anything (x->ls_out, gensym(native_filepath), 0, &output_filepath);
+	}
+		
+	// close directory
+	path_closefolder(folder_state);
+	
+}
+
