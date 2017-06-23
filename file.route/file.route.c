@@ -25,8 +25,8 @@ typedef struct _file_route
 	// attributes
 	t_symbol	*beginswith, *endswith;
 
-	t_symbol	*param;
-	t_int		*comparison;
+	t_symbol	*attr_argval;
+	t_int		*attr_name;
 	
 	// default (rightmost) outlet
 	void		*default_out;
@@ -35,12 +35,10 @@ typedef struct _file_route
 
 /** Possible comparisons
  */
-enum c_val {
+enum _attr_names {
 	C_BEGINSWITH,
-	C_ENDSWITH,
-	C_FILETYPE,
-	C_KIND
-} c_val;
+	C_ENDSWITH
+} e_attr_names;
 
 /** Function prototypes
  */
@@ -102,14 +100,14 @@ void file_route_assist(t_file_route *x, void *b, long m, long a, char *s)
 	}
 	else {	// outlet
 		if (a < x->attr_argcount) {
-			switch (x->comparison[a]) {
+			switch (x->attr_name[a]) {
 					
 				case C_BEGINSWITH:
-					sprintf(s, "full path if filename begins with %s", x->param[a].s_name);
+					sprintf(s, "full path if filename begins with %s", x->attr_argval[a].s_name);
 					break;
 					
 				case C_ENDSWITH:
-					sprintf(s, "full path if filename ends with %s", x->param[a].s_name);
+					sprintf(s, "full path if filename ends with %s", x->attr_argval[a].s_name);
 			}
 		} else {
 			sprintf(s, "default");
@@ -136,10 +134,10 @@ void *file_route_new(t_symbol *s, long argc, t_atom *argv)
 	x->attr_argcount = 0;
 
 	// initialize param
-	x->param	= NULL;
+	x->attr_argval	= NULL;
 
 	// initialize comparison
-	x->comparison	= NULL;
+	x->attr_name	= NULL;
 
 	attr_args_process(x, argc, argv);
 	
@@ -161,25 +159,25 @@ t_max_err file_route_beginswith_get(t_file_route *x, void *attr, long *argc, t_a
 t_max_err file_route_beginswith_set(t_file_route *x, void *attr, long argc, t_atom *argv)
 {
 	// allocate (or reallocate) x->param
-	if (x->param)
-		x->param = (t_symbol *)sysmem_resizeptr(x->param, (x->attr_argcount + argc) * sizeof(t_symbol));
+	if (x->attr_argval)
+		x->attr_argval = (t_symbol *)sysmem_resizeptr(x->attr_argval, (x->attr_argcount + argc) * sizeof(t_symbol));
 	else
-		x->param = (t_symbol *)sysmem_newptr(argc * sizeof(t_symbol));
+		x->attr_argval = (t_symbol *)sysmem_newptr(argc * sizeof(t_symbol));
 
 	
 	// allocate (or reallocate) x->comparison
-	if (x->comparison)
-		x->comparison = (t_int *)sysmem_resizeptr(x->comparison, (x->attr_argcount + argc) * sizeof(t_int));
+	if (x->attr_name)
+		x->attr_name = (t_int *)sysmem_resizeptr(x->attr_name, (x->attr_argcount + argc) * sizeof(t_int));
 	else
-		x->comparison = (t_int *)sysmem_newptr(argc * sizeof(t_int));
+		x->attr_name = (t_int *)sysmem_newptr(argc * sizeof(t_int));
 
 	
 	// put param & comparison
 	t_int j = 0;
 	for (t_int i = x->attr_argcount; i < x->attr_argcount + argc; i++) {
 		
-		x->param[i] = *atom_getsym(argv + j);
-		x->comparison[i] = C_BEGINSWITH;
+		x->attr_argval[i] = *atom_getsym(argv + j);
+		x->attr_name[i] = C_BEGINSWITH;
 		
 		j++;
 	}
@@ -201,25 +199,25 @@ t_max_err file_route_endswith_get(t_file_route *x, void *attr, long *argc, t_ato
 t_max_err file_route_endswith_set(t_file_route *x, void *attr, long argc, t_atom *argv)
 {
 	// allocate (or reallocate) x->param
-	if (x->param)
-		x->param = (t_symbol *)sysmem_resizeptr(x->param, (x->attr_argcount + argc) * sizeof(t_symbol));
+	if (x->attr_argval)
+		x->attr_argval = (t_symbol *)sysmem_resizeptr(x->attr_argval, (x->attr_argcount + argc) * sizeof(t_symbol));
 	else
-		x->param = (t_symbol *)sysmem_newptr(argc * sizeof(t_symbol));
+		x->attr_argval = (t_symbol *)sysmem_newptr(argc * sizeof(t_symbol));
 	
 	
 	// allocate (or reallocate) x->comparison
-	if (x->comparison)
-		x->comparison = (t_int *)sysmem_resizeptr(x->comparison, (x->attr_argcount + argc) * sizeof(t_int));
+	if (x->attr_name)
+		x->attr_name = (t_int *)sysmem_resizeptr(x->attr_name, (x->attr_argcount + argc) * sizeof(t_int));
 	else
-		x->comparison = (t_int *)sysmem_newptr(argc * sizeof(t_int));
+		x->attr_name = (t_int *)sysmem_newptr(argc * sizeof(t_int));
 	
 	
 	// put param & comparison
 	t_int j = 0;
 	for (t_int i = x->attr_argcount; i < x->attr_argcount + argc; i++) {
 		
-		x->param[i] = *atom_getsym(argv + j);
-		x->comparison[i] = C_ENDSWITH;
+		x->attr_argval[i] = *atom_getsym(argv + j);
+		x->attr_name[i] = C_ENDSWITH;
 		
 		j++;
 	}
@@ -254,17 +252,17 @@ void file_route_list(t_file_route *x, t_symbol *s, long argc, t_atom *argv)
 	// iterate outlets
 	for (t_int i = x->attr_argcount - 1; i >= 0; i--) {
 		
-		switch (x->comparison[i]) {
+		switch (x->attr_name[i]) {
 				
 			case C_BEGINSWITH:
-				if (begins_with(x->param[i].s_name, filename)) {
+				if (begins_with(x->attr_argval[i].s_name, filename)) {
 					outlet_anything(outlet_nth((t_object *)x, i), s, 0, &full_path);
 					match = true;
 				}
 				break;
 				
 			case C_ENDSWITH:
-				if (ends_with(x->param[i].s_name, filename)) {
+				if (ends_with(x->attr_argval[i].s_name, filename)) {
 					outlet_anything(outlet_nth((t_object *)x, i), s, 0, &full_path);
 					match = true;
 				}
