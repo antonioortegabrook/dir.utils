@@ -49,10 +49,10 @@ void ext_main(void *r)
 void dir_ls_assist(t_dir_ls *x, void *b, long m, long a, char *s)
 {
 	if (m == ASSIST_INLET) { // inlet
-		sprintf(s, "Path (symbol)");
+		sprintf(s, "path (symbol)");
 	}
 	else {	// outlet
-		sprintf(s, "Directory contents (symbol)", a);
+		sprintf(s, "directory contents (dump, symbol)");
 	}
 }
 

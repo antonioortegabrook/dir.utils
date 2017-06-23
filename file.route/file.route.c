@@ -23,7 +23,7 @@ typedef struct _file_route
 	long		attr_argcount;
 	
 	// attributes
-	t_symbol	*beginswith, *endswith, *filetype, *kind;
+	t_symbol	*beginswith, *endswith;
 
 	t_symbol	*param;
 	t_int		*comparison;
@@ -82,9 +82,6 @@ void ext_main(void *r)
 	// attr
 	CLASS_ATTR_SYM(c, "beginswith",	0,	t_file_route, beginswith);
 	CLASS_ATTR_SYM(c, "endswith",	0,	t_file_route, endswith);
-	CLASS_ATTR_SYM(c, "filetype",	0,	t_file_route, filetype);
-	CLASS_ATTR_SYM(c, "kind",	0,	t_file_route, kind);
-	
 	
 	// override default accessors
 	CLASS_ATTR_ACCESSORS(c, "beginswith", (method)file_route_beginswith_get, (method)file_route_beginswith_set);
@@ -101,10 +98,23 @@ void ext_main(void *r)
 void file_route_assist(t_file_route *x, void *b, long m, long a, char *s)
 {
 	if (m == ASSIST_INLET) { // inlet
-		sprintf(s, "Path");
+		sprintf(s, "path (symbol)");
 	}
 	else {	// outlet
-		sprintf(s, "I am outlet %ld", a);
+		if (a < x->attr_argcount) {
+			switch (x->comparison[a]) {
+					
+				case C_BEGINSWITH:
+					sprintf(s, "full path if filename begins with %s", x->param[a].s_name);
+					break;
+					
+				case C_ENDSWITH:
+					sprintf(s, "full path if filename ends with %s", x->param[a].s_name);
+			}
+		} else {
+			sprintf(s, "default");
+		}
+
 	}
 }
 
@@ -186,6 +196,8 @@ t_max_err file_route_endswith_get(t_file_route *x, void *attr, long *argc, t_ato
 {
 	return MAX_ERR_NONE;
 }
+
+
 t_max_err file_route_endswith_set(t_file_route *x, void *attr, long argc, t_atom *argv)
 {
 	// allocate (or reallocate) x->param
