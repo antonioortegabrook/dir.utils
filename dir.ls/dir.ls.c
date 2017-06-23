@@ -1,5 +1,7 @@
 /**
-	Lists the content of a directory
+	Lists the contents of a directory
+ 
+	los paths son absolutos y en estilo nativo; para convertirlos, ver los objetos standard.
 */
 
 #include "ext.h"
@@ -77,7 +79,7 @@ void dir_ls_anything(t_dir_ls *x, t_symbol *s, long argc, t_atom *argv)
 {
 	char *path_name;
 	short path;
-	char filename[MAX_FILENAME_CHARS];
+	char dirname[MAX_FILENAME_CHARS];
 
 	void *folder_state;
 
@@ -91,24 +93,26 @@ void dir_ls_anything(t_dir_ls *x, t_symbol *s, long argc, t_atom *argv)
 	t_atom output_filepath;
 	
 	if (!s) {
-		object_post((t_object *)x, "Not a symbol - return");
+		object_error((t_object *)x, "Not a symbol");
 		return;
 	}
 	
 	
 	path_name = s->s_name;
 	
-	if (!path_frompathname(path_name, &path, filename)) {
+	// open dir
+	if (!path_frompathname(path_name, &path, dirname)) {
 		
 		folder_state = path_openfolder(path);
 		
-		if ((int *)folder_state == 0) {
+		if (!(int *)folder_state) {
 			
-			object_post((t_object *)x, "Directory cannot be accessed - return");
+			object_error((t_object *)x, "Directory cannot be accessed");
 			return;
 		}
 	} else {
-		// error code
+		// OS-specific error code
+		object_error((t_object *)x, "Can't conform dirname");
 		return;
 	}
 
@@ -117,7 +121,7 @@ void dir_ls_anything(t_dir_ls *x, t_symbol *s, long argc, t_atom *argv)
 		
 		path_toabsolutesystempath(path, next_filename, posix_filepath);
 		
-		// probar diferentes PATH_TYPE. Agregarlo como parámetro
+		// conform path
 		path_nameconform(posix_filepath, native_filepath, PATH_STYLE_NATIVE, PATH_TYPE_ABSOLUTE);
 		
 		// put into atom
