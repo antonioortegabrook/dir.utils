@@ -7,6 +7,9 @@
  
  
 	if argument is only a number (or a number and a dot), use quotation marks
+	Attributes are hidden from inspector because they should not be changed once te object is instantiated
+ 
+	TODO: documentation
  
 */
 
@@ -33,11 +36,13 @@ typedef struct _file_route
 
 } t_file_route;
 
-/** Possible comparisons
+/** Attribute names
  */
-enum _attr_names {
+enum attr_names {
+	
 	C_BEGINSWITH,
 	C_ENDSWITH
+
 } e_attr_names;
 
 /** Function prototypes
@@ -48,7 +53,7 @@ void file_route_assist(t_file_route *x, void *b, long m, long a, char *s);
 
 void file_route_list(t_file_route *x, t_symbol *s, long argc, t_atom *argv);
 
-/** Attr getter and setter
+/** Attr getters and setters
  */
 t_max_err file_route_beginswith_get(t_file_route *x, void *attr, long *argc, t_atom **argv);
 t_max_err file_route_beginswith_set(t_file_route *x, void *attr, long argc, t_atom *argv);
@@ -84,8 +89,10 @@ void ext_main(void *r)
 	// override default accessors
 	CLASS_ATTR_ACCESSORS(c, "beginswith", (method)file_route_beginswith_get, (method)file_route_beginswith_set);
 	CLASS_ATTR_ACCESSORS(c, "endswith", (method)file_route_endswith_get, (method)file_route_endswith_set);
-	
-//	CLASS_ATTR_INVISIBLE(c, "beginswith", 0); // hide attribute from inspector
+
+	// hide attribute from inspector
+	CLASS_ATTR_INVISIBLE(c, "beginswith", 0);
+	CLASS_ATTR_INVISIBLE(c, "beginswith", 0);
 
 
 	class_register(CLASS_BOX, c); /* CLASS_NOBOX */
@@ -198,21 +205,21 @@ t_max_err file_route_endswith_get(t_file_route *x, void *attr, long *argc, t_ato
 
 t_max_err file_route_endswith_set(t_file_route *x, void *attr, long argc, t_atom *argv)
 {
-	// allocate (or reallocate) x->param
+	// allocate (or reallocate) x->attr_argval
 	if (x->attr_argval)
 		x->attr_argval = (t_symbol *)sysmem_resizeptr(x->attr_argval, (x->attr_argcount + argc) * sizeof(t_symbol));
 	else
 		x->attr_argval = (t_symbol *)sysmem_newptr(argc * sizeof(t_symbol));
 	
 	
-	// allocate (or reallocate) x->comparison
+	// allocate (or reallocate) x->attr_name
 	if (x->attr_name)
 		x->attr_name = (t_int *)sysmem_resizeptr(x->attr_name, (x->attr_argcount + argc) * sizeof(t_int));
 	else
 		x->attr_name = (t_int *)sysmem_newptr(argc * sizeof(t_int));
 	
 	
-	// put param & comparison
+	// put argval & name
 	t_int j = 0;
 	for (t_int i = x->attr_argcount; i < x->attr_argcount + argc; i++) {
 		
