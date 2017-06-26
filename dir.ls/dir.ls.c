@@ -223,7 +223,6 @@ void dir_ls_anything(t_dir_ls *x, t_symbol *s, long argc, t_atom *argv)
 	
 	t_fileinfo file;
 	
-	t_atom output_filepath;
 	
 	if (!s) {
 		object_error((t_object *)x, "Not a symbol");
@@ -258,9 +257,7 @@ void dir_ls_anything(t_dir_ls *x, t_symbol *s, long argc, t_atom *argv)
 		
 		// conform path		(tal vez sería mejor _STYLE_MAX...?)
 		path_nameconform(posix_filepath, native_filepath, PATH_STYLE_NATIVE, PATH_TYPE_ABSOLUTE);
-		
-		// put into atom
-		atom_setsym(&output_filepath, gensym(native_filepath));
+
 
 		// check attr
 		if (match_attr_showhidden(x, next_filename)	&&
@@ -268,7 +265,7 @@ void dir_ls_anything(t_dir_ls *x, t_symbol *s, long argc, t_atom *argv)
 		    match_attr_type(x, &file)) {
 			
 			// send data out
-			outlet_anything (x->ls_out, gensym(native_filepath), 0, 0/*&output_filepath*/);
+			outlet_anything (x->ls_out, gensym(native_filepath), 0, 0);
 		}
 	}
 		

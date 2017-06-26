@@ -241,7 +241,6 @@ t_max_err file_route_endswith_set(t_file_route *x, void *attr, long argc, t_atom
 
 void file_route_list(t_file_route *x, t_symbol *s, long argc, t_atom *argv)
 {
-        t_atom full_path;
 	int match = false;
 	long default_outlet = x->attr_argcount;
 
@@ -250,7 +249,6 @@ void file_route_list(t_file_route *x, t_symbol *s, long argc, t_atom *argv)
 
 	path_splitnames(s->s_name, foldername, filename);
 
-	atom_setsym(&full_path, s);
 	
 	// iterate outlets
 	for (t_int i = x->attr_argcount - 1; i >= 0; i--) {
@@ -259,14 +257,14 @@ void file_route_list(t_file_route *x, t_symbol *s, long argc, t_atom *argv)
 				
 			case C_BEGINSWITH:
 				if (begins_with(x->attr_argval[i].s_name, filename)) {
-					outlet_anything(outlet_nth((t_object *)x, i), s, 0, &full_path);
+					outlet_anything(outlet_nth((t_object *)x, i), s, 0, 0);
 					match = true;
 				}
 				break;
 				
 			case C_ENDSWITH:
 				if (ends_with(x->attr_argval[i].s_name, filename)) {
-					outlet_anything(outlet_nth((t_object *)x, i), s, 0, &full_path);
+					outlet_anything(outlet_nth((t_object *)x, i), s, 0, 0);
 					match = true;
 				}
 				break;
@@ -274,7 +272,7 @@ void file_route_list(t_file_route *x, t_symbol *s, long argc, t_atom *argv)
 	}
 	
 	if (!match)
-		outlet_anything(outlet_nth((t_object *)x, default_outlet), s, 0, &full_path);
+		outlet_anything(outlet_nth((t_object *)x, default_outlet), s, 0, 0);
 }
 
 
