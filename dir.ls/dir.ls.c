@@ -6,7 +6,7 @@
 	los paths son absolutos y en estilo nativo; para convertirlos, ver los objetos standard.
 	TODO:
 	documentation
-	tal vez los paths deberían ser en estilo max
+	podría haber atributos negativos para kind y type, ej. @type_isnot BMP; podría ser una manera de deshacernos del atributo kind.
  
 */
 
