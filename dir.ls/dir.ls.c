@@ -219,7 +219,7 @@ void dir_ls_anything(t_dir_ls *x, t_symbol *s, long argc, t_atom *argv)
 	short descend = 0;
 	
 	char posix_filepath[MAX_PATH_CHARS];
-	char native_filepath[MAX_PATH_CHARS];
+	char max_filepath[MAX_PATH_CHARS];
 	
 	t_fileinfo file;
 	
@@ -256,7 +256,7 @@ void dir_ls_anything(t_dir_ls *x, t_symbol *s, long argc, t_atom *argv)
 		path_toabsolutesystempath(path, next_filename, posix_filepath);
 		
 		// conform path		(tal vez sería mejor _STYLE_MAX...?)
-		path_nameconform(posix_filepath, native_filepath, PATH_STYLE_NATIVE, PATH_TYPE_ABSOLUTE);
+		path_nameconform(posix_filepath, max_filepath, PATH_STYLE_MAX, PATH_TYPE_ABSOLUTE);
 
 
 		// check attr
@@ -265,7 +265,7 @@ void dir_ls_anything(t_dir_ls *x, t_symbol *s, long argc, t_atom *argv)
 		    match_attr_type(x, &file)) {
 			
 			// send data out
-			outlet_anything (x->ls_out, gensym(native_filepath), 0, 0);
+			outlet_anything (x->ls_out, gensym(max_filepath), 0, 0);
 		}
 	}
 		
