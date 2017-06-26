@@ -12,6 +12,7 @@
  
 	TODO: documentation
 	add possible attr: @contains
+	podríamos tener atributos negativos ej. @beginsnotwhith a.
  
 */
 
@@ -94,7 +95,7 @@ void ext_main(void *r)
 
 	// hide attribute from inspector
 	CLASS_ATTR_INVISIBLE(c, "beginswith", 0);
-	CLASS_ATTR_INVISIBLE(c, "beginswith", 0);
+	CLASS_ATTR_INVISIBLE(c, "endswith", 0);
 
 
 	class_register(CLASS_BOX, c); /* CLASS_NOBOX */
