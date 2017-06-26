@@ -283,7 +283,8 @@ int match_attr_showhidden(t_dir_ls *x, char *filename)
 		return strncmp(".", filename, 1);
 }
 
-
+// evaluar si este atributo es realmente necesario; alias y package no funcionan y para folder existe type fold
+// aún así, @kind file puede ser muy útil...
 int match_attr_kind(t_dir_ls *x, t_fileinfo *file)
 {
 	if (!x->kind_c || !strcmp(x->kind->s_name, ""))
@@ -311,14 +312,20 @@ int match_attr_kind(t_dir_ls *x, t_fileinfo *file)
 
 int match_attr_type(t_dir_ls *x, t_fileinfo *file)
 {
+	uint8_t type_char[4] = {0, 0, 0, 0};
 	t_fourcc type_param;
+	long len;
 	
 	if (!x->type_c || !strcmp(x->type->s_name, ""))
 		return true;
 	
 	for (long i = 0; i < x->type_c; i++) {
-		// mejorar esto!
-		type_param = *(t_fourcc *)x->type[i].s_name;
+		len = strlen(x->type[i].s_name);
+		
+		for (int j = 0; j < 4 && i < len; j++)
+			type_char[j] = x->type[i].s_name[j];
+
+		type_param = *(t_fourcc *)type_char;
 		STR_TO_FOURCC(type_param);
 		
 		if (file->type == type_param)
@@ -327,6 +334,4 @@ int match_attr_type(t_dir_ls *x, t_fileinfo *file)
 
 	return false;
 }
-
-
 
