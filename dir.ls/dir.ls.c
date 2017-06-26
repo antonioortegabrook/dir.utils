@@ -4,6 +4,10 @@
 	Lists the contents of a directory (outputs full paths)
  
 	los paths son absolutos y en estilo nativo; para convertirlos, ver los objetos standard.
+	TODO:
+	documentation
+	tal vez los paths deberían ser en estilo max
+ 
 */
 
 #include "ext.h"
@@ -252,7 +256,7 @@ void dir_ls_anything(t_dir_ls *x, t_symbol *s, long argc, t_atom *argv)
 		
 		path_toabsolutesystempath(path, next_filename, posix_filepath);
 		
-		// conform path
+		// conform path		(tal vez sería mejor _STYLE_MAX...?)
 		path_nameconform(posix_filepath, native_filepath, PATH_STYLE_NATIVE, PATH_TYPE_ABSOLUTE);
 		
 		// put into atom
@@ -264,7 +268,7 @@ void dir_ls_anything(t_dir_ls *x, t_symbol *s, long argc, t_atom *argv)
 		    match_attr_type(x, &file)) {
 			
 			// send data out
-			outlet_anything (x->ls_out, gensym(native_filepath), 0, &output_filepath);
+			outlet_anything (x->ls_out, gensym(native_filepath), 0, 0/*&output_filepath*/);
 		}
 	}
 		
@@ -316,7 +320,7 @@ int match_attr_type(t_dir_ls *x, t_fileinfo *file)
 		return true;
 	
 	for (long i = 0; i < x->type_c; i++) {
-		
+		// mejorar esto!
 		type_param = *(t_fourcc *)x->type[i].s_name;
 		STR_TO_FOURCC(type_param);
 		
