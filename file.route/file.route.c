@@ -4,12 +4,14 @@
 	Receives paths and routes them to different outputs according to several criteria:
  
 	@beginswith:
+	@endswith:
  
  
 	if argument is only a number (or a number and a dot), use quotation marks
 	Attributes are hidden from inspector because they should not be changed once te object is instantiated
  
 	TODO: documentation
+	add possible attr: @contains
  
 */
 
@@ -242,18 +244,12 @@ void file_route_list(t_file_route *x, t_symbol *s, long argc, t_atom *argv)
         t_atom full_path;
 	int match = false;
 	long default_outlet = x->attr_argcount;
-	
-	short path;
+
 	char filename[MAX_FILENAME_CHARS];
-	t_fileinfo file;
-	
-	if (path_frompathname(s->s_name, &path, filename)) {
-		// error
-		return;
-	}
-	
-	path_fileinfo(filename, path, &file);
-	
+	char foldername[MAX_FILENAME_CHARS];
+
+	path_splitnames(s->s_name, foldername, filename);
+
 	atom_setsym(&full_path, s);
 	
 	// iterate outlets
