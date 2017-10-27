@@ -7,7 +7,7 @@
 	@endswith:
  
  
-	if argument is only a number (or a number and a dot), use quotation marks
+	if argument is only a number (or a number and a period), use quotation marks
 	Attributes are hidden from inspector because they should not be changed once te object is instantiated
  
 	TODO: documentation
