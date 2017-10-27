@@ -1,0 +1,2 @@
+- Inicializar Git en el directorio Source, del SDK
+- Clonar ahí mismo
