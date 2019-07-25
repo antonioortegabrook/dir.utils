@@ -13,6 +13,10 @@
 #include "ext.h"
 #include "ext_obex.h"
 
+#ifdef WIN_VERSION
+#include <stdint.h>
+#endif
+
 
 /** Object struct
  */
